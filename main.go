@@ -1,14 +1,27 @@
 package main
 
 import (
+	"context"
 	"github.com/urfave/cli"
 	C "go-hentai/constant"
+	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 	"time"
 )
 
 var (
-	HomeDir string
+	disableBwm           bool
+	disableLogging       bool
+	flushlogs            bool
+	maxconnections       int
+	port                 int
+	rescancache          int
+	skipFreeSpaceCheck   bool
+	verifyCache          bool
+	disableIpOriginCheck bool
+	disableFloodControl  bool
 )
 
 func init() {
@@ -20,16 +33,7 @@ func main() {
 	app.Version = C.ClientVersion + " (Build " + strconv.Itoa(C.ClientBuild) + ")"
 	app.Copyright = "Copyright (c) 2008-" + strconv.Itoa(time.Now().Year()) + ", E-Hentai.org - all rights reserved."
 	app.Usage = "This software comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to modify and redistribute it under the GPL v3 license."
-	var disableBwm bool
-	var disableLogging bool
-	var flushlogs bool
-	var maxconnections int
-	var port int
-	var rescancache int
-	var skipFreeSpaceCheck bool
-	var verifyCache bool
-	var disableIpOriginCheck bool
-	var disableFloodControl bool
+
 	app.Flags = []cli.Flag{
 		cli.BoolFlag{
 			Name:        "disable_bwm,db",
@@ -103,5 +107,16 @@ func main() {
 			Name:        "temp-dir",
 			Destination: &C.Path.TempDir,
 		},
+	}
+	app.Before = func(c *cli.Context) error {
+		_, cancel := context.WithCancel(context.Background())
+		sigChan := make(chan os.Signal, 2)
+		signal.Notify(sigChan, syscall.SIGILL, syscall.SIGTERM)
+		go func() {
+			<-sigChan
+			cancel()
+
+		}()
+		return nil
 	}
 }
