@@ -25,9 +25,7 @@ var (
 	disableFloodControl  bool
 )
 
-func init() {
 
-}
 func main() {
 	app := newHentaiApp()
 	_ = app.Run(os.Args)
@@ -53,9 +51,9 @@ func newHentaiApp() *cli.App {
 		return nil
 	}
 	app.Action = func(c *cli.Context) error {
-		if c.NumFlags() == 0 {
-			return cli.ShowAppHelp(c)
-		}
+		//if c.NumFlags() == 0 {
+		//	return cli.ShowAppHelp(c)
+		//}
 		fmt.Println("xxa")
 		return func(c *cli.Context) error {
 			return nil
